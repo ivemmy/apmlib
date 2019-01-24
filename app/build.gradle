@@ -1,0 +1,160 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+/*apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'*/
+
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //    debugCompile(name: 'leakcanary-android-1.5.4', ext: 'aar')
+    //    releaseCompile(name: 'leakcanary-android-no-op-1.5.4', ext: 'aar')
+    //implementation 'com.squareup.leakcanary:leakcanary-android:1.5'
+    testImplementation 'junit:junit:4.12'
+    implementation 'cglib:cglib-nodep:3.2.10'
+    implementation 'com.loopj.android:android-async-http:1.4.9'
+    implementation 'com.android.support:support-v4:26.1.0'
+    implementation 'com.android.support:support-annotations:26.1.0'
+    implementation files('libs/gson-2.8.0.jar')
+    implementation files('libs/leakcanary-analyzer-1.5.4.jar')
+    implementation files('libs/leakcanary-android-1.5.4.jar')
+}
+publish {
+    userOrg = 'scutitest'//bintray.com自己创建的组织名称
+    groupId = 'com.scutitest'//项目路径
+    artifactId = 'apmlib'//项目名称
+    publishVersion = '1.1.2'//版本号
+    desc = 'Oh hi, this is a nice description for a project, right?'//项目描述
+    website = 'http://i-test.com.cn'//项目主页
+    bintrayUser = 'yeleaveszi' //你的用户名
+    bintrayKey = 'a9cf0e8dde8c4a43600e925e2cbd77c9885a56f1' //用户key
+}
+
+def _BASENAME = "TestJar";
+def _VERSION = "_V1.0";
+def _DestinationPath = "build"; //生成jar包的位置
+def zipFile = file('build/intermediates/bundles/debug/classes.jar'); //待打包文件位置
+
+task deleteBuild(type:Delete){
+    delete _DestinationPath + _BASENAME + _VERSION + ".jar"
+}
+
+task makeJar(type:Jar){
+    from zipTree(zipFile)
+    from fileTree(dir:'src/main',includes:['assets/**']) //将assets目录打入jar包
+    baseName = _BASENAME + _VERSION
+    destinationDir = file(_DestinationPath)
+}
+
+makeJar.dependsOn(deleteBuild, build)
+
+
+/*
+
+def siteUrl = 'http://i-test.com.cn' // 项目的主页 一般填你项目的github地址即可
+def gitUrl = 'https://github.com/yeleaveszi/APM.git' // Git仓库的url 填你项目的git地址
+group = "com.itest.apm" // Maven Group ID for the artifact，一般填你唯一的包名
+version = "1.1.0"//项目版本号
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                // Add your description here
+                name 'itest APM' //项目描述
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'itest'    //填写一些开发者的基本信息
+                        name 'itest'
+                        email 'yeleaveszi@163.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+javadoc {
+    options{
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        author true
+        version true
+        links "http://docs.oracle.com/javase/7/docs/api"
+
+    }
+}
+
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    configurations = ['archives']
+    pkg {
+        repo = "APM"         //仓库名字 repository
+        name = "core"    //发布到JCenter上的项目名字 package
+        userOrg = 'i-test'    //组织名称 organization
+        //上边三个可自由填写 但是一定要和bintray账号中我们添加的组织、仓库、包名对应上，否则肯定上传失败 一会我们去bintray中添加这几项。
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+*/
